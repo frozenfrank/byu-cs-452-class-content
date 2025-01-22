@@ -7,7 +7,6 @@ My project models data that someone running a dog show might find useful. Includ
 <img src="schema.png">
 
 
-
 ## Query I thought it did well on
 
 **Question**: What are the names and cities of the dogs who have awards?
@@ -67,6 +66,3 @@ The multi-shot prompt made it worse for this question. In both cases (single and
 
 ## Conclusion
 My findings is that for fairly simple joins chatgpt 4 preview does well at creating SQL queries. This could be useful for data engineers. Actually having a chat interface for non-engineers has issues and could give completely inaccurate answers.
-
-
-

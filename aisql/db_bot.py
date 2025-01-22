@@ -10,6 +10,11 @@ fdir = os.path.dirname(__file__)
 def getPath(fname):
     return os.path.join(fdir, fname)
 
+# Prevent committing config.json
+# This is a local change. Reverse with:
+#          git update-index --no-assume-unchanged config.json
+os.system("git update-index --assume-unchanged '" + getPath("config.json") + "'")
+
 # SQLITE
 sqliteDbPath = getPath("aidb.sqlite")
 setupSqlPath = getPath("setup.sql")
@@ -17,7 +22,7 @@ setupSqlDataPath = getPath("setupData.sql")
 
 # Erase previous db
 if os.path.exists(sqliteDbPath):
-    os.remove(sqliteDbPath) 
+    os.remove(sqliteDbPath)
 
 sqliteCon = sqlite3.connect(sqliteDbPath) # create new db
 sqliteCursor = sqliteCon.cursor()
@@ -64,8 +69,8 @@ def getChatGptResponse(content):
 commonSqlOnlyRequest = " Give me a sqlite select statement that answers the question. Only respond with sqlite syntax. If there is an error do not expalin it!"
 strategies = {
     "zero_shot": setupSqlScript + commonSqlOnlyRequest,
-    "single_domain_double_shot": (setupSqlScript + 
-                   " Who doesn't have a way for us to text them? " + 
+    "single_domain_double_shot": (setupSqlScript +
+                   " Who doesn't have a way for us to text them? " +
                    " \nSELECT p.person_id, p.name\nFROM person p\nLEFT JOIN phone ph ON p.person_id = ph.person_id AND ph.can_recieve_sms = 1\nWHERE ph.phone_id IS NULL;\n " +
                    commonSqlOnlyRequest)
 }
@@ -112,8 +117,8 @@ for strategy in strategies:
             print(err)
 
         questionResults.append({
-            "question": question, 
-            "sql": sqlSyntaxResponse, 
+            "question": question,
+            "sql": sqlSyntaxResponse,
             "queryRawResponse": queryRawResponse,
             "friendlyResponse": friendlyResponse,
             "error": error
@@ -123,7 +128,7 @@ for strategy in strategies:
 
     with open(getPath(f"response_{strategy}_{time()}.json"), "w") as outFile:
         json.dump(responses, outFile, indent = 2)
-            
+
 
 sqliteCursor.close()
 sqliteCon.close()
