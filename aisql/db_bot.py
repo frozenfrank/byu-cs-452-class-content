@@ -1,7 +1,7 @@
 import json
 from openai import OpenAI
 import os
-import sqlite3
+import supabase
 from time import time
 
 print("Running db_bot.py!")
@@ -15,30 +15,15 @@ def getPath(fname):
 #          git update-index --no-assume-unchanged config.json
 os.system("git update-index --assume-unchanged '" + getPath("config.json") + "'")
 
-# SQLITE
-sqliteDbPath = getPath("aidb.sqlite")
+# Read in setup scripts for context
 setupSqlPath = getPath("setup.sql")
-setupSqlDataPath = getPath("setupData.sql")
-
-# Erase previous db
-if os.path.exists(sqliteDbPath):
-    os.remove(sqliteDbPath)
-
-sqliteCon = sqlite3.connect(sqliteDbPath) # create new db
-sqliteCursor = sqliteCon.cursor()
-with (
-        open(setupSqlPath) as setupSqlFile,
-        open(setupSqlDataPath) as setupSqlDataFile
-    ):
-
+with (open(setupSqlPath) as setupSqlFile):
     setupSqlScript = setupSqlFile.read()
-    setupSQlDataScript = setupSqlDataFile.read()
 
-sqliteCursor.executescript(setupSqlScript) # setup tables and keys
-sqliteCursor.executescript(setupSQlDataScript) # setup tables and keys
-
+# Open SQL Connection & Cursor
+sqlConnection, sqlCursor = supabase.openConnection()
 def runSql(query):
-    result = sqliteCursor.execute(query).fetchall()
+    result = sqlCursor.execute(query).fetchall()
     return result
 
 # OPENAI
@@ -130,6 +115,6 @@ for strategy in strategies:
         json.dump(responses, outFile, indent = 2)
 
 
-sqliteCursor.close()
-sqliteCon.close()
+sqlCursor.close()
+sqlConnection.close()
 print("Done!")
