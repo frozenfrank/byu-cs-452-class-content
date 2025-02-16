@@ -2,3 +2,4 @@ aidb.sqlite
 response_*.json
 config.json
 config-*.json
+.env
