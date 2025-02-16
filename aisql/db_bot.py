@@ -23,7 +23,8 @@ with (open(setupSqlPath) as setupSqlFile):
 # Open SQL Connection & Cursor
 sqlConnection, sqlCursor = supabase.openConnection()
 def runSql(query):
-    result = sqlCursor.execute(query).fetchall()
+    sqlCursor.execute(query)
+    result = sqlCursor.fetchall()
     return result
 
 # OPENAI
@@ -98,7 +99,7 @@ for strategy in strategies:
             queryRawResponse = str(runSql(sqlSyntaxResponse))
             print(queryRawResponse)
             friendlyResultsPrompt = "Here is the PostgreSQL schema that was used as context:"
-            friendlyResultsPrompt += setupSqlFile
+            friendlyResultsPrompt += setupSqlScript
             friendlyResultsPrompt += "\n\nI asked a question \"" + question +"\" and the response was \""+queryRawResponse+"\"."
             friendlyResultsPrompt += "\n\nPlease, just give a concise response in a more friendly way? Please do not give any other suggests or chatter."
             friendlyResponse = getChatGptResponse(friendlyResultsPrompt)

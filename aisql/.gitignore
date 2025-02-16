@@ -3,3 +3,4 @@ response_*.json
 config.json
 config-*.json
 .env
+__pycache__/
