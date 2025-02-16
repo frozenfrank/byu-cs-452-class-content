@@ -62,13 +62,13 @@ strategies = {
 }
 
 questions = [
-    "I need to create two-three groups into my table. Can you please generate the SQL to create a group based in Antarctica and another group based in Puerto Rico?",
+    # "I need to create two-three groups into my table. Can you please generate the SQL to create a group based in Antarctica and another group based in Puerto Rico?",
     "Which roles in the company are the most expensive?",
     "What is the percentage complete of each open project? (What percentage of it's tasks are at 100 percent complete?)",
     "What is the total square footage covered by each project?",
     "How many total employees of each job title are scheduled this week?",
     "How many total employees of each job title are scheduled each week (this week, next week, ... up to 6 weeks in the future)?",
-    "Which tasks do not have an rp_request_id?",
+    "How many tasks do not have an rp_request_id?",
     "Which groups have the most active projects?",
     "How much am I spending today on all my tasks and projects?",
     "How many total employees are required to be working on all the tasks?",
