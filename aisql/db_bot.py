@@ -1,7 +1,7 @@
 import json
 from openai import OpenAI
 import os
-import sqlite3
+import supabase
 from time import time
 
 print("Running db_bot.py!")
@@ -15,30 +15,16 @@ def getPath(fname):
 #          git update-index --no-assume-unchanged config.json
 os.system("git update-index --assume-unchanged '" + getPath("config.json") + "'")
 
-# SQLITE
-sqliteDbPath = getPath("aidb.sqlite")
+# Read in setup scripts for context
 setupSqlPath = getPath("setup.sql")
-setupSqlDataPath = getPath("setupData.sql")
-
-# Erase previous db
-if os.path.exists(sqliteDbPath):
-    os.remove(sqliteDbPath)
-
-sqliteCon = sqlite3.connect(sqliteDbPath) # create new db
-sqliteCursor = sqliteCon.cursor()
-with (
-        open(setupSqlPath) as setupSqlFile,
-        open(setupSqlDataPath) as setupSqlDataFile
-    ):
-
+with (open(setupSqlPath) as setupSqlFile):
     setupSqlScript = setupSqlFile.read()
-    setupSQlDataScript = setupSqlDataFile.read()
 
-sqliteCursor.executescript(setupSqlScript) # setup tables and keys
-sqliteCursor.executescript(setupSQlDataScript) # setup tables and keys
-
+# Open SQL Connection & Cursor
+sqlConnection, sqlCursor = supabase.openConnection()
 def runSql(query):
-    result = sqliteCursor.execute(query).fetchall()
+    sqlCursor.execute(query)
+    result = sqlCursor.fetchall()
     return result
 
 # OPENAI
@@ -66,25 +52,28 @@ def getChatGptResponse(content):
 
 
 # strategies
-commonSqlOnlyRequest = " Give me a sqlite select statement that answers the question. Only respond with sqlite syntax. If there is an error do not expalin it!"
+commonSqlOnlyRequest = " Give me a postgreSQL select statement that answers the question. Only respond with postgreSQL syntax. If there is an error do not explain it!"
 strategies = {
     "zero_shot": setupSqlScript + commonSqlOnlyRequest,
     "single_domain_double_shot": (setupSqlScript +
-                   " Who doesn't have a way for us to text them? " +
-                   " \nSELECT p.person_id, p.name\nFROM person p\nLEFT JOIN phone ph ON p.person_id = ph.person_id AND ph.can_recieve_sms = 1\nWHERE ph.phone_id IS NULL;\n " +
+                   " How many total employees of each job title are scheduled this week? " +
+                   "\nSELECT COALESCE(SUM(t.num_employees), 0) AS total_employees\nFROM public.task t\nWHERE t.start_date >= CURRENT_DATE \n    AND t.start_date < CURRENT_DATE + INTERVAL '7 days';" +
                    commonSqlOnlyRequest)
 }
 
 questions = [
-    "Which are the most awarded dogs?",
-    "Which dogs have multiple owners?",
-    "Which people have multiple dogs?",
-    "What are the top 3 cities represented?",
-    "What are the names and cities of the dogs who have awards?",
-    "Who has more than one phone number?",
-    "Who doesn't have a way for us to text them?",
-    "Will we have a problem texting any of the previous award winners?"
-    # "I need insert sql into my tables can you provide good unique data?"
+    # "I need to create two-three groups into my table. Can you please generate the SQL to create a group based in Antarctica and another group based in Puerto Rico?",
+    "Which roles in the company are the most expensive?",
+    "What is the percentage complete of each open project? (What percentage of it's tasks are at 100 percent complete?)",
+    "What is the total square footage covered by each project?",
+    "How many total employees of each job title are scheduled this week?",
+    "How many total employees of each job title are scheduled each week (this week, next week, ... up to 6 weeks in the future)?",
+    "How many tasks do not have an rp_request_id?",
+    "Which groups have the most active projects?",
+    "How much am I spending today on all my tasks and projects?",
+    "How many total employees are required to be working on all the tasks?",
+    "What is the maximum number of employees that will be required on a weekly basis in the next year?",
+    "What is the minimum number of employees that will be required on a weekly basis in the next year?",
 ]
 
 def sanitizeForJustSql(value):
@@ -109,7 +98,10 @@ for strategy in strategies:
             print(sqlSyntaxResponse)
             queryRawResponse = str(runSql(sqlSyntaxResponse))
             print(queryRawResponse)
-            friendlyResultsPrompt = "I asked a question \"" + question +"\" and the response was \""+queryRawResponse+"\" Please, just give a concise response in a more friendly way? Please do not give any other suggests or chatter."
+            friendlyResultsPrompt = "Here is the PostgreSQL schema that was used as context:"
+            friendlyResultsPrompt += setupSqlScript
+            friendlyResultsPrompt += "\n\nI asked a question \"" + question +"\" and the response was \""+queryRawResponse+"\"."
+            friendlyResultsPrompt += "\n\nPlease, just give a concise response in a more friendly way? Please do not give any other suggests or chatter."
             friendlyResponse = getChatGptResponse(friendlyResultsPrompt)
             print(friendlyResponse)
         except Exception as err:
@@ -130,6 +122,6 @@ for strategy in strategies:
         json.dump(responses, outFile, indent = 2)
 
 
-sqliteCursor.close()
-sqliteCon.close()
+sqlCursor.close()
+sqlConnection.close()
 print("Done!")
