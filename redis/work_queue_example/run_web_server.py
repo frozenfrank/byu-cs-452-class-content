@@ -15,8 +15,9 @@ import io
 
 # initialize our Flask application and Redis server
 app = flask.Flask(__name__)
-db = redis.StrictRedis(host=settings.REDIS_HOST,
-	port=settings.REDIS_PORT, password=settings.REDIS_PASSWORD, db=settings.REDIS_DB)
+db = redis.StrictRedis(
+	db=settings.REDIS_DB, host=settings.REDIS_HOST, port=settings.REDIS_PORT,
+	username=settings.REDIS_USERNAME, password=settings.REDIS_PASSWORD)
 
 def prepare_image(image, target):
 	# if the image mode is not RGB, convert it

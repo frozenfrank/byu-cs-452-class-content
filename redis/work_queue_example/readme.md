@@ -3,7 +3,7 @@
 This sample was taken from a machine learning blog:
 https://www.pyimagesearch.com/2018/02/05/deep-learning-production-keras-redis-flask-apache/
 
-Feel free to read the blog and understand the intent of the provided code. 
+Feel free to read the blog and understand the intent of the provided code.
 
 # Setup settings.py
 
@@ -12,7 +12,11 @@ You will need to put your own redis connection information in [settings.py](sett
 # Python environment
 - Recommend using Python 3.11.3 https://www.python.org/ftp/python/3.11.3/
 - I like to use VSCode. You can launch vscode from this directory. Then use the command pallete to (ctrl+shift+p) "Python: Create Virtual Environment". Then choose the 3.11.3 version and check the box for including requirements.txt (or pip install it after).
-- pip install -r requirements.txt
+
+  ```shell
+  conda activate myenv
+  pip install -r requirements.txt
+  ```
 
 # Questions
 
