@@ -1,6 +1,7 @@
 # initialize Redis connection settings
 REDIS_HOST = "redis-13701.c238.us-central1-2.gce.redns.redis-cloud.com"
 REDIS_PORT = 13701 # <-- likely need to change this too!
+REDIS_USERNAME = "CS 452"
 REDIS_PASSWORD = "5fugAGjn8EpMG#K"
 REDIS_DB = 0
 

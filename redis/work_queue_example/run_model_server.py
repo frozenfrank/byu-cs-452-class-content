@@ -13,8 +13,9 @@ import os
 os.environ['KMP_DUPLICATE_LIB_OK']='True'
 
 # connect to Redis server
-db = redis.StrictRedis(host=settings.REDIS_HOST,
-	port=settings.REDIS_PORT, password=settings.REDIS_PASSWORD, db=settings.REDIS_DB)
+db = redis.StrictRedis(
+	db=settings.REDIS_DB, host=settings.REDIS_HOST, port=settings.REDIS_PORT,
+	username=settings.REDIS_USERNAME, password=settings.REDIS_PASSWORD)
 
 def classify_process():
 	# load the pre-trained Keras model (here we are using a model
